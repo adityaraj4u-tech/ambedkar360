@@ -1,0 +1,61 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@theme inline {
+  --color-background: #f9f8f3;
+  --color-foreground: #002147;
+  --color-primary: #002147;
+  --color-primary-foreground: #f9f8f3;
+  --color-border: #002147;
+  --font-sans: 'Arial', 'Helvetica Neue', sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
+
+:root { color-scheme: light; }
+
+@layer base {
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
+  body { @apply bg-background text-foreground; margin: 0; }
+  button, a { cursor: pointer; }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+main > * { animation: rise-in 700ms ease-out both; }
+main > *:nth-child(2) { animation-delay: 80ms; }
+main > *:nth-child(3) { animation-delay: 160ms; }
+main > *:nth-child(4) { animation-delay: 240ms; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; scroll-behavior: auto !important; } }
+
+::selection { background: #c56a35; color: #f9f8f3; }
+
+@media (min-width: 768px) {
+  .font-mono { font-family: 'Courier New', monospace; }
+}
+
+@media (max-width: 767px) {
+  h1 { font-size: clamp(3.5rem, 16vw, 5rem); }
+}
+
+@supports (font-variation-settings: normal) {
+  body { font-family: Arial, 'Helvetica Neue', sans-serif; }
+}
+
+:root { --ring: #c56a35; }
+
+.dark { color-scheme: dark; }
+
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: light; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+}
+
