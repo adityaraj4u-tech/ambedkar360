@@ -13,6 +13,9 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData()
   const file = formData.get('file')
   if (!(file instanceof File)) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+  if (file.size > 50 * 1024 * 1024) return NextResponse.json({ error: 'File must be smaller than 50 MB' }, { status: 413 })
+  const allowed = file.type.startsWith('audio/') || file.type.startsWith('image/') || file.type === 'application/pdf'
+  if (!allowed) return NextResponse.json({ error: 'Only audio, image, and PDF files are supported' }, { status: 415 })
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-').toLowerCase()
   const blob = await put(`ambedkar-archive/${crypto.randomUUID()}-${safeName}`, file, { access: 'public' })
   return NextResponse.json({ success: true, url: blob.url, fileName: blob.pathname })

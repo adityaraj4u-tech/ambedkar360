@@ -2,202 +2,66 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Upload, Loader2, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, FileUp, Loader2, ShieldCheck, XCircle } from 'lucide-react'
+
+type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export default function AdminPage() {
-  const [uploading, setUploading] = useState(false)
-  const [uploadStatus, setUploadStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [statusMessage, setStatusMessage] = useState('')
   const [authorized, setAuthorized] = useState<boolean | null>(null)
+  const [title, setTitle] = useState('')
+  const [subtitle, setSubtitle] = useState('')
+  const [category, setCategory] = useState('Essay')
+  const [year, setYear] = useState('')
+  const [description, setDescription] = useState('')
+  const [status, setStatus] = useState<'draft' | 'published'>('draft')
+  const [featured, setFeatured] = useState(false)
+  const [cover, setCover] = useState<File | null>(null)
+  const [audio, setAudio] = useState<File | null>(null)
+  const [formStatus, setFormStatus] = useState<Status>('idle')
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     fetch('/api/admin').then((response) => setAuthorized(response.ok)).catch(() => setAuthorized(false))
   }, [])
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
+  async function upload(file: File) {
+    const body = new FormData()
+    body.append('file', file)
+    const response = await fetch('/api/blob', { method: 'POST', body })
+    if (!response.ok) throw new Error('File upload failed')
+    return (await response.json()).url as string
+  }
 
-    setUploading(true)
-    setUploadStatus('loading')
-    setStatusMessage('Uploading to Vercel Blob Storage...')
-
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!title.trim()) return
+    setFormStatus('loading')
+    setMessage('Creating manuscript and uploading files...')
     try {
-      const file = files[0]
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('fileName', `ambedkar-archive/${Date.now()}-${file.name}`)
-
-      const response = await fetch('/api/blob', {
-        method: 'POST',
-        body: formData,
+      const slug = title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      const manuscriptResponse = await fetch('/api/manuscripts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, title: title.trim(), subtitle: subtitle.trim() || null, category, year: year ? Number(year) : null, description: description.trim() || null, status, featured }),
       })
-
-      if (!response.ok) {
-        throw new Error('Upload failed')
+      if (!manuscriptResponse.ok) throw new Error('Could not create manuscript')
+      const manuscript = (await manuscriptResponse.json()).data
+      const files = [{ file: cover, kind: 'scan', title: 'Cover image' }, { file: audio, kind: 'audio', title: 'Audio narration' }]
+      for (const item of files) {
+        if (!item.file) continue
+        const url = await upload(item.file)
+        const mediaResponse = await fetch('/api/media', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ manuscript_id: manuscript.id, kind: item.kind, title: item.title, url, mime_type: item.file.type, alt_text: `${title} ${item.kind}` }) })
+        if (!mediaResponse.ok) throw new Error('Manuscript created, but media attachment failed')
       }
-
-      const data = await response.json()
-      setUploadStatus('success')
-      setStatusMessage(`✅ File uploaded successfully! URL: ${data.url}`)
+      setFormStatus('success')
+      setMessage(status === 'published' ? 'Published to the public archive.' : 'Saved as a draft. You can publish it later from the archive list.')
+      setTitle(''); setSubtitle(''); setYear(''); setDescription(''); setCover(null); setAudio(null)
     } catch (error) {
-      setUploadStatus('error')
-      setStatusMessage(`❌ Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    } finally {
-      setUploading(false)
+      setFormStatus('error'); setMessage(error instanceof Error ? error.message : 'Something went wrong')
     }
   }
 
   if (authorized === null) return <main className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">Checking admin access...</main>
-  if (!authorized) return <main className="min-h-screen bg-background px-5 py-20 text-center text-foreground"><h1 className="text-3xl font-semibold">Admin access required</h1><p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">Sign in with an approved archive administrator account to manage manuscripts and uploads.</p><Link href="/auth/login" className="mt-6 inline-flex bg-accent px-4 py-2 text-xs font-bold text-accent-foreground">Sign in</Link></main>
+  if (!authorized) return <main className="min-h-screen bg-background px-5 py-20 text-center text-foreground"><h1 className="text-3xl font-semibold">Admin access required</h1><p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">Sign in with an approved archive administrator account.</p><Link href="/auth/login" className="mt-6 inline-flex bg-accent px-4 py-2 text-xs font-bold text-accent-foreground">Sign in</Link></main>
 
-  return (
-    <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-foreground/10 px-5 py-5 lg:px-10">
-        <Link
-          href="/archive"
-          className="inline-flex items-center gap-2 text-sm font-semibold hover:text-accent transition-colors"
-        >
-          <ArrowLeft size={16} /> Back to archive
-        </Link>
-      </header>
-
-      <section className="mx-auto max-w-[1440px] px-5 py-12 lg:px-10">
-        <div className="mb-12">
-          <h1 className="text-4xl font-semibold tracking-[-0.045em]">Admin Panel</h1>
-          <p className="mt-2 text-sm opacity-60">
-            Manage manuscripts, upload audio, and handle OCR processing
-          </p>
-        </div>
-
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Upload Audio */}
-          <div className="border border-foreground/10 bg-card p-8">
-            <div className="flex size-12 items-center justify-center rounded-lg bg-accent/15 mb-4">
-              <Upload size={24} className="text-accent" />
-            </div>
-            <h3 className="text-lg font-semibold">Upload Audio</h3>
-            <p className="mt-2 text-sm opacity-75">
-              Upload manuscript audio narrations to Vercel Blob Storage
-            </p>
-            <div className="mt-4">
-              <label className="block">
-                <span className="sr-only">Upload audio file</span>
-                <input
-                  type="file"
-                  accept="audio/*"
-                  onChange={handleFileUpload}
-                  disabled={uploading}
-                  className="block w-full text-sm cursor-pointer rounded border border-[#002147]/20 px-3 py-2 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[#C56A35] file:text-white hover:file:bg-[#A0501F]"
-                />
-              </label>
-              {uploadStatus !== 'idle' && (
-                <div className={`mt-3 flex items-start gap-2 text-sm ${
-                  uploadStatus === 'success' ? 'text-green-600' : uploadStatus === 'error' ? 'text-red-600' : 'text-blue-600'
-                }`}>
-                  {uploadStatus === 'loading' && <Loader2 size={16} className="animate-spin shrink-0 mt-0.5" />}
-                  {uploadStatus === 'success' && <CheckCircle size={16} className="shrink-0 mt-0.5" />}
-                  {uploadStatus === 'error' && <AlertCircle size={16} className="shrink-0 mt-0.5" />}
-                  <span className="break-words">{statusMessage}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Upload Manuscript Image */}
-          <div className="border border-foreground/10 bg-card p-8">
-            <div className="flex size-12 items-center justify-center rounded-lg bg-accent/15 mb-4">
-              <Upload size={24} className="text-accent" />
-            </div>
-            <h3 className="text-lg font-semibold">Upload Manuscript Pages</h3>
-            <p className="mt-2 text-sm opacity-75">
-              Upload PDF pages or manuscript images for the digital reader
-            </p>
-            <div className="mt-4">
-              <label className="block">
-                <span className="sr-only">Upload manuscript file</span>
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={handleFileUpload}
-                  disabled={uploading}
-                  className="block w-full text-sm cursor-pointer rounded border border-[#002147]/20 px-3 py-2 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[#C56A35] file:text-white hover:file:bg-[#A0501F]"
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* OCR Processing */}
-          <div className="border border-foreground/10 bg-card p-8">
-            <div className="flex size-12 items-center justify-center rounded-lg bg-accent/15 mb-4">
-              <Upload size={24} className="text-accent" />
-            </div>
-            <h3 className="text-lg font-semibold">Process OCR</h3>
-            <p className="mt-2 text-sm opacity-75">
-              Extract text from manuscript images using OCR
-            </p>
-            <button className="mt-4 w-full rounded bg-[#C56A35] px-4 py-2 text-xs font-bold text-[#F9F8F3] transition-all duration-200 hover:bg-[#A0501F] active:scale-95">
-              Coming Soon
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-16 rounded-lg border border-[#002147]/15 bg-white p-8">
-          <h2 className="text-2xl font-semibold mb-6">Setup Instructions</h2>
-          <div className="space-y-6 text-sm">
-            <div>
-              <h3 className="font-semibold mb-2">1. Vercel Blob Storage Setup</h3>
-              <ol className="list-decimal list-inside space-y-1 opacity-75">
-                <li>Go to your Vercel project dashboard</li>
-                <li>Navigate to Storage → Blob</li>
-                <li>Click "Create" and give it a name (e.g., "ambedkar-storage")</li>
-                <li>Environment variables will be automatically added</li>
-                <li>Redeploy your application</li>
-              </ol>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-2">2. Firebase/MongoDB Setup (Optional)</h3>
-              <ol className="list-decimal list-inside space-y-1 opacity-75">
-                <li>Create a Firebase project at console.firebase.google.com</li>
-                <li>Create Firestore database in test mode</li>
-                <li>Add SDK configuration to your app</li>
-                <li>Or use MongoDB Atlas at mongodb.com</li>
-              </ol>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-2">3. Environment Variables</h3>
-              <code className="block bg-[#002147]/5 p-3 rounded font-mono text-xs whitespace-pre-wrap">
-{`# .env.local
-BLOB_READ_WRITE_TOKEN=<from-vercel-dashboard>
-NEXT_PUBLIC_BLOB_URL=https://<your-blob-id>.blob.vercel-storage.com
-
-# Firebase (if using)
-NEXT_PUBLIC_FIREBASE_API_KEY=...
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=...`}
-              </code>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-2">4. Upload Files</h3>
-              <ol className="list-decimal list-inside space-y-1 opacity-75">
-                <li>Use the upload panels above to add audio and manuscript files</li>
-                <li>Files will be stored in Vercel Blob Storage</li>
-                <li>Get the URL and update manuscript metadata</li>
-                <li>Reference URLs in your manifest database</li>
-              </ol>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-6">
-          <p className="text-sm text-blue-900">
-            <strong>ℹ️ Note:</strong> To fully enable file uploads, you need to configure Vercel Blob Storage.
-            Go to your Vercel dashboard, enable Blob Storage for this project, and redeploy.
-          </p>
-        </div>
-      </section>
-    </main>
-  )
+  return <main className="min-h-screen bg-background text-foreground"><header className="border-b border-foreground/10 px-5 py-5 lg:px-10"><Link href="/archive" className="inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:text-accent"><ArrowLeft size={16} /> Back to archive</Link></header><section className="mx-auto max-w-5xl px-5 py-12 lg:px-10"><div className="mb-10"><p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Archive control room</p><h1 className="mt-3 text-5xl font-semibold tracking-[-0.06em]">Add to the archive.</h1><p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Create a manuscript, attach files, and choose whether it is immediately visible to readers.</p></div><form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[1fr_280px]"><div className="border border-foreground/10 bg-card p-6 sm:p-8"><div className="grid gap-5 sm:grid-cols-2"><label className="sm:col-span-2"><span className="mb-2 block text-xs font-bold uppercase tracking-wider">Title</span><input required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Annihilation of Caste" className="w-full border border-foreground/20 bg-background px-3 py-3 text-sm outline-none focus:border-primary" /></label><label><span className="mb-2 block text-xs font-bold uppercase tracking-wider">Subtitle</span><input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="w-full border border-foreground/20 bg-background px-3 py-3 text-sm outline-none focus:border-primary" /></label><label><span className="mb-2 block text-xs font-bold uppercase tracking-wider">Year</span><input type="number" value={year} onChange={(e) => setYear(e.target.value)} className="w-full border border-foreground/20 bg-background px-3 py-3 text-sm outline-none focus:border-primary" /></label><label><span className="mb-2 block text-xs font-bold uppercase tracking-wider">Category</span><select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full border border-foreground/20 bg-background px-3 py-3 text-sm outline-none focus:border-primary"><option>Essay</option><option>Speech</option><option>Book</option><option>Letter</option><option>Writing</option></select></label><label className="sm:col-span-2"><span className="mb-2 block text-xs font-bold uppercase tracking-wider">Description</span><textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} className="w-full resize-y border border-foreground/20 bg-background px-3 py-3 text-sm outline-none focus:border-primary" /></label></div></div><aside className="flex flex-col gap-5"><div className="border border-foreground/10 bg-card p-6"><div className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck size={16} className="text-accent" /> Publishing</div><div className="mt-5 flex gap-2"><button type="button" onClick={() => setStatus('draft')} className={`flex-1 border px-3 py-2 text-xs font-bold ${status === 'draft' ? 'border-primary bg-primary text-primary-foreground' : 'border-foreground/20'}`}>Draft</button><button type="button" onClick={() => setStatus('published')} className={`flex-1 border px-3 py-2 text-xs font-bold ${status === 'published' ? 'border-primary bg-primary text-primary-foreground' : 'border-foreground/20'}`}>Publish</button></div><label className="mt-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} /> Feature this work</label></div><div className="border border-foreground/10 bg-card p-6"><FileUp size={20} className="text-accent" /><h2 className="mt-3 text-lg font-semibold">Attach files</h2><p className="mt-1 text-xs leading-5 text-muted-foreground">Files are uploaded and attached automatically when you submit.</p><label className="mt-5 block text-xs font-bold uppercase tracking-wider">Cover or scan<input type="file" accept="image/*,.pdf" onChange={(e) => setCover(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-xs" /></label><label className="mt-5 block text-xs font-bold uppercase tracking-wider">Audio narration<input type="file" accept="audio/*" onChange={(e) => setAudio(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-xs" /></label></div><button disabled={formStatus === 'loading'} className="flex items-center justify-center gap-2 bg-accent px-5 py-3 text-sm font-bold text-accent-foreground transition-transform hover:-translate-y-0.5 disabled:opacity-50">{formStatus === 'loading' && <Loader2 size={16} className="animate-spin" />} Add to archive</button>{formStatus !== 'idle' && <div className={`flex items-start gap-2 text-sm ${formStatus === 'success' ? 'text-green-700' : formStatus === 'error' ? 'text-red-700' : 'text-muted-foreground'}`}>{formStatus === 'success' ? <CheckCircle2 size={17} /> : formStatus === 'error' ? <XCircle size={17} /> : null}<span>{message}</span></div>}</aside></form></section></main>
 }
