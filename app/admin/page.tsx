@@ -53,10 +53,10 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-[#002147]/15 px-5 py-5 lg:px-10">
+      <header className="border-b border-foreground/10 px-5 py-5 lg:px-10">
         <Link
           href="/archive"
-          className="inline-flex items-center gap-2 text-sm font-semibold hover:text-[#C56A35] transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-semibold hover:text-accent transition-colors"
         >
           <ArrowLeft size={16} /> Back to archive
         </Link>
@@ -72,9 +72,9 @@ export default function AdminPage() {
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {/* Upload Audio */}
-          <div className="rounded-lg border border-[#002147]/15 bg-white p-8">
-            <div className="flex size-12 items-center justify-center rounded-lg bg-[#C56A35]/20 mb-4">
-              <Upload size={24} className="text-[#C56A35]" />
+          <div className="border border-foreground/10 bg-card p-8">
+            <div className="flex size-12 items-center justify-center rounded-lg bg-accent/15 mb-4">
+              <Upload size={24} className="text-accent" />
             </div>
             <h3 className="text-lg font-semibold">Upload Audio</h3>
             <p className="mt-2 text-sm opacity-75">
@@ -105,9 +105,9 @@ export default function AdminPage() {
           </div>
 
           {/* Upload Manuscript Image */}
-          <div className="rounded-lg border border-[#002147]/15 bg-white p-8">
-            <div className="flex size-12 items-center justify-center rounded-lg bg-[#C56A35]/20 mb-4">
-              <Upload size={24} className="text-[#C56A35]" />
+          <div className="border border-foreground/10 bg-card p-8">
+            <div className="flex size-12 items-center justify-center rounded-lg bg-accent/15 mb-4">
+              <Upload size={24} className="text-accent" />
             </div>
             <h3 className="text-lg font-semibold">Upload Manuscript Pages</h3>
             <p className="mt-2 text-sm opacity-75">
@@ -128,9 +128,9 @@ export default function AdminPage() {
           </div>
 
           {/* OCR Processing */}
-          <div className="rounded-lg border border-[#002147]/15 bg-white p-8">
-            <div className="flex size-12 items-center justify-center rounded-lg bg-[#C56A35]/20 mb-4">
-              <Upload size={24} className="text-[#C56A35]" />
+          <div className="border border-foreground/10 bg-card p-8">
+            <div className="flex size-12 items-center justify-center rounded-lg bg-accent/15 mb-4">
+              <Upload size={24} className="text-accent" />
             </div>
             <h3 className="text-lg font-semibold">Process OCR</h3>
             <p className="mt-2 text-sm opacity-75">

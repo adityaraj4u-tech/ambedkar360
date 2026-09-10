@@ -43,7 +43,7 @@ main > *:nth-child(4) { animation-delay: 240ms; }
 }
 
 @media (max-width: 767px) {
-  h1 { font-size: clamp(3.5rem, 16vw, 5rem); }
+  h1 { font-size: clamp(2.8rem, 13vw, 4.5rem); }
 }
 
 @supports (font-variation-settings: normal) {
