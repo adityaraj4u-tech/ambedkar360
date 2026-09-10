@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Upload, Loader2, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react'
 
@@ -8,6 +8,11 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [statusMessage, setStatusMessage] = useState('')
+  const [authorized, setAuthorized] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    fetch('/api/admin').then((response) => setAuthorized(response.ok)).catch(() => setAuthorized(false))
+  }, [])
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -43,8 +48,11 @@ export default function AdminPage() {
     }
   }
 
+  if (authorized === null) return <main className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">Checking admin access...</main>
+  if (!authorized) return <main className="min-h-screen bg-background px-5 py-20 text-center text-foreground"><h1 className="text-3xl font-semibold">Admin access required</h1><p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">Sign in with an approved archive administrator account to manage manuscripts and uploads.</p><Link href="/auth/login" className="mt-6 inline-flex bg-accent px-4 py-2 text-xs font-bold text-accent-foreground">Sign in</Link></main>
+
   return (
-    <main className="min-h-screen bg-[#F9F8F3] text-[#002147]">
+    <main className="min-h-screen bg-background text-foreground">
       <header className="border-b border-[#002147]/15 px-5 py-5 lg:px-10">
         <Link
           href="/archive"
