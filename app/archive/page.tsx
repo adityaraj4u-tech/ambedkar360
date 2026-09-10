@@ -25,7 +25,7 @@ export default function ArchivePage() {
   })
 
   return (
-    <main className="min-h-screen bg-[#F9F8F3] text-[#002147]">
+    <main className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-[#002147]/15 bg-[#F9F8F3]">
         <div className="mx-auto max-w-[1440px] px-5 py-6 lg:px-10">
           <div className="flex items-center gap-3 mb-6">
@@ -43,7 +43,7 @@ export default function ArchivePage() {
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-4xl font-semibold tracking-[-0.045em]">Digital Archive</h1>
+            <div className="flex items-end justify-between gap-4"><div><p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#b85c38]">The reading room</p><h1 className="text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">Digital Archive</h1></div><span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] opacity-50 sm:block">{manuscripts.length} records</span></div>
             <p className="text-sm opacity-60">
               Explore the complete collection of Dr. B. R. Ambedkar's writings, speeches, and manuscripts
             </p>
@@ -81,7 +81,7 @@ export default function ArchivePage() {
       </header>
 
       <section className="mx-auto max-w-[1440px] px-5 py-10 lg:px-10">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
           <aside className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
               <div>
@@ -117,7 +117,7 @@ export default function ArchivePage() {
           </aside>
 
           <div className="lg:col-span-3">
-            <div className="space-y-4">
+<div className="grid gap-4 xl:grid-cols-2">
               {filtered.length === 0 ? (
                 <div className="rounded-lg border border-[#002147]/15 bg-[#002147]/5 px-6 py-12 text-center">
                   <p className="text-sm opacity-60">No manuscripts match your search criteria.</p>
@@ -127,7 +127,7 @@ export default function ArchivePage() {
                   <Link
                     key={manuscript.id}
                     href={`/manuscript/${manuscript.id}`}
-                    className="group block rounded-lg border border-[#002147]/15 bg-white p-5 transition-all duration-200 hover:shadow-md hover:border-[#002147]/30"
+                    className="group block border border-[#132b3f]/15 bg-white/70 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#132b3f]/35 hover:bg-white hover:shadow-lg"
                   >
                     <div className="flex gap-5">
                       <div className="h-32 w-24 shrink-0 rounded-lg bg-[#E6DCC8] flex items-center justify-center text-[#002147]/20">

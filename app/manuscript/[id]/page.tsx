@@ -33,8 +33,9 @@ const sampleOcrText = [
 
 const suggestedQueries = ['Summarize this', 'Key arguments', 'Find related content', 'Historical context']
 
-export default function ManuscriptPage({ params }: { params: { id: string } }) {
-  const manuscript = getManuscriptById(params.id)
+export default async function ManuscriptPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const manuscript = getManuscriptById(id)
 
   const [zoom, setZoom] = useState(100)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -51,7 +52,7 @@ export default function ManuscriptPage({ params }: { params: { id: string } }) {
 
   if (!manuscript) {
     return (
-      <main className="min-h-screen bg-[#F9F8F3] text-[#002147]">
+      <main className="min-h-screen bg-background text-foreground">
         <header className="border-b border-[#002147]/15 px-5 py-5 lg:px-10">
           <Link href="/archive" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-[#C56A35] transition-colors">
             <ArrowLeft size={16} /> Back to archive
@@ -82,7 +83,7 @@ export default function ManuscriptPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#F9F8F3] text-[#002147]">
+    <main className="min-h-screen bg-background text-foreground">
       <header className="mx-auto flex max-w-[1440px] items-center justify-between border-b border-[#002147]/15 px-5 py-5 lg:px-10">
         <Link
           href="/archive"
@@ -104,7 +105,7 @@ export default function ManuscriptPage({ params }: { params: { id: string } }) {
             <FileText className="inline mr-2" size={13} />
             {manuscript.category}
           </span>
-          <h1 className="mt-3 text-4xl font-semibold tracking-[-0.045em]">{manuscript.title}</h1>
+          <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">{manuscript.title}</h1>
           <p className="mt-2 text-sm opacity-60">
             {manuscript.author} · {manuscript.year} · {manuscript.pages} pages
           </p>
