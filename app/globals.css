@@ -3,16 +3,18 @@
 @import 'shadcn/tailwind.css';
 
 @theme inline {
-  --color-background: #f5f1e8;
-  --color-foreground: #132b3f;
-  --color-primary: #132b3f;
-  --color-primary-foreground: #f5f1e8;
-  --color-border: #132b3f;
-  --color-muted: #e8e1d4;
-  --color-muted-foreground: #5c6b70;
-  --color-accent: #b85c38;
-  --color-accent-foreground: #fffaf1;
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
+  --color-primary: #020617;
+  --color-primary-foreground: #f8fafc;
+  --color-border: #334155;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #cbd5e1;
+  --color-card: #111c31;
+  --color-accent: #d97706;
+  --color-accent-foreground: #fff7ed;
   --font-sans: 'Arial', 'Helvetica Neue', sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
   --font-mono: 'Courier New', monospace;
 }
 

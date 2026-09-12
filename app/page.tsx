@@ -1,25 +1,5 @@
-import Link from 'next/link'
-import { ArrowDown, ArrowRight, BookOpen, FileText, Globe2 } from 'lucide-react'
-import { ArchiveShell, Eyebrow } from '@/components/archive-shell'
-import { AmbedkarHeroScene } from '@/components/ambedkar-hero-scene'
-
-const features = [
-  ['1936', 'Annihilation of Caste', 'The defining text on caste, equality, and the work of social reform.', '/manuscript/annihilation-of-caste'],
-  ['1949', 'Constitutional Debates', 'Notes and speeches from the making of a democratic republic.', '/archive'],
-  ['1956', 'The Buddha and His Dhamma', 'A final work on ethics, reason, and human dignity.', '/manuscript/the-buddha-and-his-dhamma'],
-]
+import { AmbedkarExhibition } from '@/components/ambedkar-exhibition'
 
 export default function Home() {
-  return <ArchiveShell><main>
-    <section className="relative min-h-[calc(100svh-76px)] overflow-hidden bg-primary text-primary-foreground">
-      <AmbedkarHeroScene />
-      <div className="relative z-10 mx-auto flex min-h-[calc(100svh-76px)] max-w-7xl flex-col justify-between px-5 pb-8 pt-14 lg:px-8 lg:pt-20">
-        <div className="max-w-3xl"><Eyebrow>Ambedkar360 · A living digital archive</Eyebrow><h1 className="mt-6 max-w-4xl text-6xl font-semibold leading-[0.9] tracking-[-0.075em] text-balance sm:text-8xl lg:text-9xl">Ideas that refuse to be buried.</h1><p className="mt-7 max-w-xl text-base leading-7 text-primary-foreground/70">Enter an animated reading room for the writings, speeches, and public ideas of Dr. B. R. Ambedkar.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/archive" className="flex items-center gap-3 bg-accent px-5 py-3 text-sm font-bold text-accent-foreground transition-transform hover:-translate-y-0.5">Enter the archive <ArrowRight size={16} /></Link><Link href="/biography" className="flex items-center gap-2 border border-primary-foreground/30 px-5 py-3 text-sm font-semibold transition-colors hover:border-accent">Meet Ambedkar</Link></div></div>
-        <div className="flex items-end justify-between gap-6 pt-16"><p className="max-w-xs font-mono text-[10px] uppercase leading-5 tracking-[0.16em] text-primary-foreground/50">Move your cursor to look around the archive. The reading room is open to all.</p><ArrowDown className="text-accent" size={22} /></div>
-      </div>
-    </section>
-    <section className="border-y border-foreground/10 bg-card/40"><div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-foreground/10 sm:grid-cols-4"><div className="p-6 lg:p-8"><p className="font-mono text-3xl font-bold">08</p><p className="mt-2 text-xs text-muted-foreground">Featured manuscripts</p></div><div className="p-6 lg:p-8"><p className="font-mono text-3xl font-bold">65+</p><p className="mt-2 text-xs text-muted-foreground">Years of public work</p></div><div className="p-6 lg:p-8"><p className="font-mono text-3xl font-bold">03</p><p className="mt-2 text-xs text-muted-foreground">Primary formats</p></div><div className="p-6 lg:p-8"><p className="font-mono text-3xl font-bold">01</p><p className="mt-2 text-xs text-muted-foreground">Shared reading room</p></div></div></section>
-    <section className="mx-auto max-w-7xl px-5 py-20 lg:px-8"><div className="flex items-end justify-between gap-5"><div><Eyebrow>Start here</Eyebrow><h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">A guided way in.</h2></div><Link href="/archive" className="hidden items-center gap-2 text-sm font-semibold text-accent sm:flex">View all records <ArrowRight size={15} /></Link></div><div className="mt-10 grid gap-px bg-foreground/10 md:grid-cols-3">{features.map(([year, title, desc, href]) => <Link key={title} href={href} className="group bg-background p-6 transition-colors hover:bg-muted lg:p-8"><div className="flex items-center justify-between"><span className="font-mono text-[10px] text-accent">{year}</span><ArrowRight size={16} className="text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-accent" /></div><h3 className="mt-16 text-2xl font-semibold tracking-[-0.04em]">{title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{desc}</p></Link>)}</div></section>
-    <section className="bg-primary text-primary-foreground"><div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:px-8"><div><Eyebrow>Why this archive</Eyebrow><h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em]">Preservation is only the beginning.</h2></div><div className="grid gap-6 sm:grid-cols-3"><div><BookOpen className="text-accent" size={22} /><h3 className="mt-4 font-semibold">Read in context</h3><p className="mt-2 text-sm leading-6 text-primary-foreground/65">Follow ideas across essays, speeches, and time.</p></div><div><FileText className="text-accent" size={22} /><h3 className="mt-4 font-semibold">See the source</h3><p className="mt-2 text-sm leading-6 text-primary-foreground/65">Pair transcriptions with the scanned folio.</p></div><div><Globe2 className="text-accent" size={22} /><h3 className="mt-4 font-semibold">Open to all</h3><p className="mt-2 text-sm leading-6 text-primary-foreground/65">A public reading room without a gate.</p></div></div></div></section>
-  </main></ArchiveShell>
+  return <AmbedkarExhibition />
 }
