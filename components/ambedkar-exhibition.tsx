@@ -1,0 +1,71 @@
+'use client'
+
+import Link from 'next/link'
+import { useState } from 'react'
+import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, Languages, Menu, Play, Search, X } from 'lucide-react'
+import { Canvas } from '@react-three/fiber'
+import { Environment, Float, OrbitControls, Text } from '@react-three/drei'
+
+const documents = [
+  { year: '1936', title: 'Annihilation of Caste', type: 'Speech manuscript', source: 'BAWS Vol. 1, p. 142', excerpt: 'Political power is the key to all social progress.', color: '#c56a35' },
+  { year: '1949', title: 'Draft Constitution', type: 'Constitutional archive', source: 'Constituent Assembly Debates', excerpt: 'Democracy is not merely a form of government.', color: '#d79a43' },
+  { year: '1956', title: 'The Buddha and His Dhamma', type: 'Final manuscript', source: 'BAWS Vol. 11, p. 19', excerpt: 'The object of religion is to teach man how to think.', color: '#7b8b9a' },
+]
+
+function ArchiveFolio({ active, onSelect }: { active: number; onSelect: () => void }) {
+  const doc = documents[active]
+  return <Float speed={1.1} rotationIntensity={0.08} floatIntensity={0.2}>
+    <group rotation={[0.08, -0.2, 0.1]} onClick={onSelect}>
+      <mesh><boxGeometry args={[2.9, 3.9, 0.16]} /><meshStandardMaterial color="#d8c29c" roughness={0.9} /></mesh>
+      <mesh position={[0, 0, 0.1]}><boxGeometry args={[2.55, 3.55, 0.02]} /><meshStandardMaterial color={doc.color} roughness={0.75} /></mesh>
+      <mesh position={[0, 0, 0.13]}><boxGeometry args={[2.18, 2.85, 0.02]} /><meshStandardMaterial color="#f3e7cd" roughness={1} /></mesh>
+      <Text position={[0, 0.9, 0.16]} fontSize={0.2} color="#132b3f" anchorX="center" font="/fonts/Inter_Bold.json">{doc.year}</Text>
+      <Text position={[0, 0.23, 0.16]} fontSize={0.16} maxWidth={1.7} color="#132b3f" anchorX="center" textAlign="center" font="/fonts/Inter_Bold.json">{doc.title}</Text>
+      <mesh position={[0, -0.72, 0.17]}><boxGeometry args={[1.4, 0.02, 0.01]} /><meshStandardMaterial color="#c56a35" /></mesh>
+    </group>
+  </Float>
+}
+
+function ArchiveCanvas({ active, onSelect }: { active: number; onSelect: () => void }) {
+  return <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 7], fov: 35}} aria-label="Interactive archival folio">
+    <ambientLight intensity={1.5} /><directionalLight position={[4, 6, 5]} intensity={3} /><Environment preset="studio" />
+    <ArchiveFolio active={active} onSelect={onSelect} /><OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.2} />
+  </Canvas>
+}
+
+export function AmbedkarExhibition() {
+  const [active, setActive] = useState(0)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [inspectorOpen, setInspectorOpen] = useState(false)
+  const doc = documents[active]
+  const next = () => setActive((active + 1) % documents.length)
+  const previous = () => setActive((active + documents.length - 1) % documents.length)
+
+  return <div className="min-h-screen bg-background text-foreground">
+    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/95 px-5 py-4 backdrop-blur-xl lg:px-10">
+      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-6"><Link href="/" className="font-serif text-xl font-bold tracking-tight">Ambedkar<span className="text-accent">360</span></Link>
+        <nav className="hidden items-center gap-8 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground md:flex"><Link href="/archive">Archive</Link><Link href="/biography">Life & work</Link><Link href="/timeline">Timeline</Link><Link href="/scholar">Scholar</Link></nav>
+        <div className="flex items-center gap-3"><Link href="/archive" className="hidden min-h-12 items-center gap-2 bg-accent px-4 text-xs font-bold uppercase tracking-[0.12em] text-accent-foreground sm:flex">Enter archive <ArrowRight size={15} /></Link><button onClick={() => setMenuOpen(!menuOpen)} className="flex size-12 items-center justify-center border border-border md:hidden" aria-label="Toggle navigation">{menuOpen ? <X /> : <Menu />}</button></div>
+      </div>
+      {menuOpen && <nav className="mx-auto flex max-w-[1440px] flex-col gap-4 border-t border-border/70 pt-4 md:hidden"><Link href="/archive">Archive</Link><Link href="/biography">Life & work</Link><Link href="/timeline">Timeline</Link><Link href="/scholar">Scholar</Link></nav>}
+    </header>
+
+    <main>
+      <section className="relative overflow-hidden border-b border-border bg-primary text-primary-foreground"><div className="mx-auto grid min-h-[690px] max-w-[1440px] items-center gap-8 px-5 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-20"><div className="relative z-10 max-w-2xl"><p className="font-mono text-[10px] uppercase tracking-[0.22em] text-accent">A living archive · open to all</p><h1 className="mt-7 font-serif text-6xl leading-[0.9] tracking-[-0.06em] text-balance sm:text-8xl">Ideas that made a republic.</h1><p className="mt-8 max-w-lg text-base leading-7 text-primary-foreground/70">Explore the writings, speeches, and constitutional imagination of Dr. B. R. Ambedkar through documents, timelines, and source-led stories.</p><div className="mt-10 flex flex-wrap gap-3"><Link href="/archive" className="flex min-h-12 items-center gap-3 bg-accent px-5 text-sm font-bold text-accent-foreground">Enter the archive <ArrowRight size={16} /></Link><button onClick={() => setInspectorOpen(true)} className="flex min-h-12 items-center gap-2 border border-primary-foreground/30 px-5 text-sm font-semibold">Read a featured source <BookOpen size={16} /></button></div></div><div className="relative h-[410px] lg:h-[560px]"><ArchiveCanvas active={active} onSelect={next} /><div className="pointer-events-none absolute bottom-4 left-4 font-mono text-[10px] uppercase tracking-[0.18em] text-primary-foreground/50">Select the folio to turn the page</div></div></div></section>
+
+      <section className="border-b border-border bg-card"><div className="mx-auto grid max-w-[1440px] grid-cols-2 divide-x divide-border sm:grid-cols-4"><div className="p-6 lg:p-8"><p className="font-mono text-3xl font-bold">08</p><p className="mt-2 text-xs text-muted-foreground">Featured manuscripts</p></div><div className="p-6 lg:p-8"><p className="font-mono text-3xl font-bold">65+</p><p className="mt-2 text-xs text-muted-foreground">Years of public work</p></div><div className="p-6 lg:p-8"><p className="font-mono text-3xl font-bold">03</p><p className="mt-2 text-xs text-muted-foreground">Languages in progress</p></div><div className="p-6 lg:p-8"><p className="font-mono text-3xl font-bold">01</p><p className="mt-2 text-xs text-muted-foreground">Shared reading room</p></div></div></section>
+
+      <section className="mx-auto max-w-[1440px] px-5 py-20 lg:px-10"><div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]"><div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent">A voice for equality</p><blockquote className="mt-6 font-serif text-4xl leading-tight tracking-[-0.04em] sm:text-5xl">“Cultivation of mind should be the ultimate aim of human existence.”</blockquote><p className="mt-6 text-sm text-muted-foreground">— Dr. B. R. Ambedkar, The Buddha and His Dhamma</p></div><div className="border-l border-border pl-6 text-lg leading-8 text-muted-foreground lg:pl-12">Ambedkar360 brings a vast public legacy into one accessible reading room. Move between the personal, the political, and the philosophical — always with the original source close at hand.</div></div></section>
+
+      <section className="border-y border-border bg-muted"><div className="mx-auto max-w-[1440px] px-5 py-20 lg:px-10"><div className="flex flex-col justify-between gap-6 md:flex-row md:items-end"><div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent">Featured folios</p><h2 className="mt-3 font-serif text-5xl tracking-[-0.05em]">Read the source.</h2></div><div className="flex items-center gap-2"><button onClick={previous} className="flex size-12 items-center justify-center border border-border" aria-label="Previous source"><ChevronLeft /></button><span className="px-2 font-mono text-xs text-muted-foreground">0{active + 1} / 0{documents.length}</span><button onClick={next} className="flex size-12 items-center justify-center border border-border" aria-label="Next source"><ChevronRight /></button></div></div><div className="mt-10 grid overflow-hidden border border-border bg-card lg:grid-cols-[1.1fr_0.9fr]"><div className="flex min-h-[380px] items-center justify-center bg-background p-8"><div className="w-full max-w-md rotate-[-2deg] border-8 border-primary bg-[#f5ead5] p-8 text-primary shadow-2xl"><p className="font-mono text-xs text-accent">{doc.year} / {doc.type}</p><h3 className="mt-14 font-serif text-4xl leading-none">{doc.title}</h3><div className="mt-12 h-px bg-accent/60" /><p className="mt-5 font-serif text-lg leading-7">“{doc.excerpt}”</p></div></div><div className="flex flex-col justify-between p-7 lg:p-10"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">{doc.source}</p><p className="mt-8 text-lg leading-8">Every record pairs a facsimile with context, transcription, and language access — keeping interpretation accountable to the material archive.</p><div className="mt-8 flex flex-wrap gap-2"><button className="flex min-h-12 items-center gap-2 border border-accent bg-accent px-4 text-xs font-bold text-accent-foreground"><Languages size={14} /> English</button><button className="flex min-h-12 items-center gap-2 border border-border px-4 text-xs font-bold text-muted-foreground"><Languages size={14} /> Marathi</button><button className="flex min-h-12 items-center gap-2 border border-border px-4 text-xs font-bold text-muted-foreground"><Languages size={14} /> Hindi</button></div></div><button onClick={() => setInspectorOpen(true)} className="mt-10 flex min-h-12 items-center gap-2 self-start border-b border-accent pb-2 text-sm font-bold">Open document inspector <ArrowRight size={16} /></button></div></div></div></section>
+
+      <section className="mx-auto max-w-[1440px] px-5 py-20 lg:px-10"><div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]"><div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent">Explore the life</p><h2 className="mt-3 font-serif text-5xl tracking-[-0.05em]">A life in motion.</h2><p className="mt-5 max-w-sm leading-7 text-muted-foreground">Trace the movements, arguments, and turning points that shaped a democratic imagination.</p></div><div className="grid gap-px bg-border sm:grid-cols-2">{[['1927','Mahad Satyagraha'],['1932','Poona Pact'],['1947','Drafting Committee'],['1956','Mahaparinirvan']].map(([year, title]) => <Link key={year} href="/timeline" className="group bg-background p-6 transition-colors hover:bg-card"><span className="font-mono text-xs text-accent">{year}</span><h3 className="mt-12 font-serif text-2xl">{title}</h3><span className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground group-hover:text-accent">Open node <ArrowRight size={14} /></span></Link>)}</div></div></section>
+
+      <section className="border-y border-border bg-primary text-primary-foreground"><div className="mx-auto grid max-w-[1440px] gap-10 px-5 py-16 lg:grid-cols-[1fr_auto] lg:items-center lg:px-10"><div><p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-accent"><Play size={14} /> Ambedkar AI Scholar</p><h2 className="mt-3 font-serif text-3xl">Ask with a source beside every answer.</h2><p className="mt-3 max-w-xl text-sm leading-6 text-primary-foreground/70">A citation-first research companion for navigating the archive.</p></div><Link href="/scholar" className="flex min-h-12 items-center gap-2 bg-accent px-5 text-sm font-bold text-accent-foreground">Open scholar <ArrowRight size={16} /></Link></div></section>
+    </main>
+
+    <footer className="mx-auto flex max-w-[1440px] flex-col gap-5 px-5 py-10 text-sm text-muted-foreground lg:flex-row lg:items-center lg:justify-between lg:px-10"><div><p className="font-serif text-lg font-bold text-foreground">Ambedkar<span className="text-accent">360</span></p><p className="mt-2">A public digital reading room.</p></div><div className="flex flex-wrap gap-5"><Link href="/archive">Archive</Link><Link href="/about">About the project</Link><Link href="/privacy">Provenance & access</Link></div><button className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em]"><Search size={15} /> Search archive</button></footer>
+
+    {inspectorOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary/85 p-5 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="inspector-title"><div className="max-h-[90vh] w-full max-w-5xl overflow-auto border border-border bg-background"><div className="flex items-center justify-between border-b border-border p-5"><div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent">Primary source inspector</p><h2 id="inspector-title" className="mt-2 font-serif text-3xl">{doc.title}</h2></div><button onClick={() => setInspectorOpen(false)} className="flex size-12 items-center justify-center border border-border" aria-label="Close inspector"><X /></button></div><div className="grid lg:grid-cols-2"><div className="bg-muted p-8"><div className="flex min-h-[330px] items-center justify-center border-8 border-primary bg-[#f5ead5] p-10 text-primary"><div><p className="font-mono text-xs text-accent">{doc.year} / FACSIMILE</p><h3 className="mt-10 font-serif text-5xl leading-none">{doc.title}</h3><p className="mt-8 font-serif text-xl leading-8">{doc.excerpt}</p></div></div></div><div className="p-8"><div className="flex items-center justify-between"><span className="font-mono text-xs text-accent">{doc.source}</span><button className="flex items-center gap-2 text-xs font-bold"><Headphones size={16} /> Listen</button></div><p className="mt-8 leading-8">This exhibition view keeps the transcription beside the document, inviting close reading across language, material, and historical context.</p><Link href="/archive" className="mt-10 inline-flex min-h-12 items-center gap-2 bg-accent px-5 text-sm font-bold text-accent-foreground">Continue reading <ArrowRight size={16} /></Link></div></div></div></div>}
+  </div>
+}

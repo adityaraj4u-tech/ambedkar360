@@ -15,8 +15,10 @@ export default function LoginPage() {
     setPending(true)
     setError('')
     const { error: authError } = await createClient().auth.signInWithPassword({ email, password })
-    if (authError) setError('Invalid email or password.')
-    else window.location.href = '/admin'
+    if (authError) {
+      const message = authError.message.toLowerCase()
+      setError(message.includes('email not confirmed') ? 'Confirm your email before signing in.' : 'Invalid email or password.')
+    } else window.location.href = '/admin'
     setPending(false)
   }
 
